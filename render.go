@@ -14,18 +14,16 @@ import (
 // Render a powerful template engine than default render of baa
 type Render struct {
 	Options
-	theme string             // default template theme name
-	t     *template.Template // template handle
+	template    *template.Template // template handle
+	fileChanges chan notifyItem    // notify file changes
 }
 
 // Options render options
 type Options struct {
+	Baa        *baa.Baa         // baa
 	Root       string           // template root dir
-	UseCache   bool             // open template content cache
-	UseTheme   bool             // open template theme support
 	Extensions []string         // template file extensions
 	FuncMap    template.FuncMap // template functions
-	Baa        *baa.Baa         // baa
 }
 
 // New create a template engine
@@ -33,11 +31,8 @@ func New(o Options) *Render {
 	r := new(Render)
 	r.Baa = o.Baa
 	r.Root = o.Root
-	r.UseCache = o.UseCache
-	r.UseTheme = o.UseTheme
 	r.Extensions = o.Extensions
 	r.FuncMap = o.FuncMap
-	r.theme = "default"
 
 	// check template dir
 	if r.Root == "" {
@@ -61,23 +56,32 @@ func New(o Options) *Render {
 	}
 
 	// set template
-	r.t = template.New("_DEFAULT_")
-	r.t.Funcs(r.FuncMap)
+	r.template = template.New("_DEFAULT_")
+	r.template.Funcs(r.FuncMap)
 
 	// load templates
-	if r.UseCache && r.Baa != nil && r.Baa.Env == baa.PROD {
-		r.loadTpls()
-	}
+	r.loadTpls()
+
+	// notify
+	r.fileChanges = make(chan notifyItem, 32)
+	go r.notify()
+	go func() {
+		for item := range r.fileChanges {
+			if r.Baa != nil && r.Baa.Debug() {
+				r.Error("filechanges Receive -> " + item.path)
+			}
+			if item.event == Create || item.event == Write {
+				r.parseFile(item.path)
+			}
+		}
+	}()
 
 	return r
 }
 
 // Render template
 func (r *Render) Render(w io.Writer, tpl string, data interface{}) error {
-	if !r.UseCache || (r.Baa != nil && r.Baa.Env != baa.PROD) {
-		r.loadTpls()
-	}
-	return r.t.ExecuteTemplate(w, r.tplName(tpl), data)
+	return r.template.ExecuteTemplate(w, r.tplName(tpl), data)
 }
 
 // loadTpls load all template files
@@ -103,6 +107,7 @@ func (r *Render) readDir(path string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
+	defer f.Close()
 	fs, err := f.Readdir(-1)
 	if err != nil {
 		return nil, err
@@ -110,7 +115,7 @@ func (r *Render) readDir(path string) ([]string, error) {
 
 	var p string
 	for _, f := range fs {
-		p = path + "/" + f.Name()
+		p = filepath.Clean(path + "/" + f.Name())
 		if f.IsDir() {
 			fs, err := r.readDir(p)
 			if err != nil {
@@ -130,7 +135,6 @@ func (r *Render) readDir(path string) ([]string, error) {
 
 // tplName get template alias from a template file path
 func (r *Render) tplName(path string) string {
-	path, _ = filepath.Abs(path)
 	if len(path) > len(r.Root) && path[:len(r.Root)] == r.Root {
 		path = path[len(r.Root):]
 	}
@@ -154,12 +158,15 @@ func (r *Render) checkExt(path string) bool {
 
 // parseFile load file and parse to template
 func (r *Render) parseFile(path string) error {
+	if r.Baa != nil && r.Baa.Debug() {
+		r.Error("loadTpl -> " + path)
+	}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
 	s := string(b)
-	t := r.t.New(r.tplName(path))
+	t := r.template.New(r.tplName(path))
 	_, err = t.Parse(s)
 	if err != nil {
 		return err
