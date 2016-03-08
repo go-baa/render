@@ -11,7 +11,7 @@ import (
 	"github.com/go-baa/baa"
 )
 
-// Render powerfull template engine than default render of baa
+// Render a powerful template engine than default render of baa
 type Render struct {
 	Options
 	theme string             // default template theme name

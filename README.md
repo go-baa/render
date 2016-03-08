@@ -1,5 +1,5 @@
 # render
-baa module providers a template engine.
+a powerful template engine than default render of baa.
 
 ## Features
 
