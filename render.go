@@ -63,18 +63,20 @@ func New(o Options) *Render {
 	r.loadTpls()
 
 	// notify
-	r.fileChanges = make(chan notifyItem, 32)
-	go r.notify()
-	go func() {
-		for item := range r.fileChanges {
-			if r.Baa != nil && r.Baa.Debug() {
-				r.Error("filechanges Receive -> " + item.path)
+	if r.Baa == nil || r.Baa.Env != baa.PROD {
+		r.fileChanges = make(chan notifyItem, 8)
+		go r.notify()
+		go func() {
+			for item := range r.fileChanges {
+				if r.Baa != nil && r.Baa.Debug() {
+					r.Error("filechanges Receive -> " + item.path)
+				}
+				if item.event == Create || item.event == Write {
+					r.parseFile(item.path)
+				}
 			}
-			if item.event == Create || item.event == Write {
-				r.parseFile(item.path)
-			}
-		}
-	}()
+		}()
+	}
 
 	return r
 }
