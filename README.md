@@ -1,5 +1,5 @@
 # render
-a powerful template engine than default render of baa.
+a template engine better than default render of baa.
 
 ## Features
 
@@ -18,15 +18,23 @@ import (
 )
 
 func main() {
+    // new app
     app := baa.New()
+    
+    // register render
+    // render is template DI for baa, must this name.
     app.SetDI("render", render.New(render.Options{
 		Baa:        app,
 		Root:       "templates/",
 		Extensions: []string{".html", ".tmpl"},
 	}))
+    
+    // router
     app.Get("/", func(c *baa.Context) {
         c.HTML(200, "index")
     })
+    
+    // run app
     app.Run(":1323")
 }
 ```
