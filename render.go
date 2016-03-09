@@ -36,17 +36,17 @@ func New(o Options) *Render {
 
 	// check template dir
 	if r.Root == "" {
-		panic("Render template dir is empty!")
+		panic("render.New: template dir is empty!")
 	}
 	r.Root, _ = filepath.Abs(r.Root)
 	if r.Root[len(r.Root)-1] != '/' {
 		r.Root += "/" // add right slash
 	}
 	if f, err := os.Stat(r.Root); err != nil {
-		panic("Render template dir[" + r.Root + "] open error: " + err.Error())
+		panic("render.New: template dir[" + r.Root + "] open error: " + err.Error())
 	} else {
 		if !f.IsDir() {
-			panic("Render template dir[" + r.Root + "] is not s directory!")
+			panic("render.New: template dir[" + r.Root + "] is not s directory!")
 		}
 	}
 
