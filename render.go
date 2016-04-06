@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/go-baa/baa"
+	"gopkg.in/baa.v1"
 )
 
 // Render a powerful template engine than default render of baa
