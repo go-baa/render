@@ -63,7 +63,7 @@ func New(o Options) *Render {
 	r.loadTpls()
 
 	// notify
-	if r.Baa == nil || r.Baa.Env != baa.PROD {
+	if baa.Env != baa.PROD {
 		r.fileChanges = make(chan notifyItem, 8)
 		go r.notify()
 		go func() {
