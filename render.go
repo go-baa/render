@@ -160,9 +160,6 @@ func (r *Render) checkExt(path string) bool {
 
 // parseFile load file and parse to template
 func (r *Render) parseFile(path string) error {
-	if r.Baa != nil && r.Baa.Debug() {
-		r.Error("loadTpl -> " + path)
-	}
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
