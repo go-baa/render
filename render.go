@@ -100,7 +100,6 @@ func (r *Render) loadTpls() {
 		if err != nil {
 			r.Error(err)
 		}
-
 	}
 }
 
