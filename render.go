@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strings"
 
 	"gopkg.in/baa.v1"
 )
@@ -38,10 +40,10 @@ func New(o Options) *Render {
 	if r.Root == "" {
 		panic("render.New: template dir is empty!")
 	}
-	r.Root, _ = filepath.Abs(r.Root)
 	if r.Root[len(r.Root)-1] != '/' {
 		r.Root += "/" // add right slash
 	}
+	r.Root, _ = filepath.Abs(r.Root)
 	if f, err := os.Stat(r.Root); err != nil {
 		panic("render.New: template dir[" + r.Root + "] open error: " + err.Error())
 	} else {
@@ -141,7 +143,11 @@ func (r *Render) tplName(path string) string {
 		path = path[len(r.Root):]
 	}
 	ext := filepath.Ext(path)
-	return path[:len(path)-len(ext)]
+	path = path[:len(path)-len(ext)]
+	if runtime.GOOS == "windows" {
+		path = strings.Replace(path, "\\", "/", -1)
+	}
+	return path
 }
 
 // checkExt check path extension allow use
