@@ -40,10 +40,14 @@ func New(o Options) *Render {
 	if r.Root == "" {
 		panic("render.New: template dir is empty!")
 	}
-	if r.Root[len(r.Root)-1] != '/' {
-		r.Root += "/" // add right slash
-	}
 	r.Root, _ = filepath.Abs(r.Root)
+	slash := "/"
+	if runtime.GOOS == "windows" {
+		slash = "\\"
+	}
+	if r.Root[len(r.Root)-1] != slash[0] {
+		r.Root += slash
+	}
 	if f, err := os.Stat(r.Root); err != nil {
 		panic("render.New: template dir[" + r.Root + "] open error: " + err.Error())
 	} else {
