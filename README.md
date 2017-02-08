@@ -13,8 +13,8 @@ a template engine better than default render of baa.
 package main
 
 import (
-    "github.com/go-baa/baa"
     "github.com/go-baa/render"
+    "gopkg.in/baa.v1"
 )
 
 func main() {
