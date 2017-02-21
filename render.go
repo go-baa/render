@@ -174,6 +174,10 @@ func (r *Render) parseFile(path string) error {
 		return err
 	}
 	s := string(b)
+	t := r.template.Lookup(r.tplName(path))
+	if t == nil {
+		t = r.template.New(r.tplName(path))
+	}
 	t := r.template.New(r.tplName(path))
 	_, err = t.Parse(s)
 	if err != nil {
