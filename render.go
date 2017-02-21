@@ -178,7 +178,6 @@ func (r *Render) parseFile(path string) error {
 	if t == nil {
 		t = r.template.New(r.tplName(path))
 	}
-	t := r.template.New(r.tplName(path))
 	_, err = t.Parse(s)
 	if err != nil {
 		return err
