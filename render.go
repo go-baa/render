@@ -61,10 +61,6 @@ func New(o Options) *Render {
 		r.Extensions = []string{".html"}
 	}
 
-	// set template
-	r.template = template.New("_DEFAULT_")
-	r.template.Funcs(r.FuncMap)
-
 	// load templates
 	r.loadTpls()
 
@@ -78,7 +74,9 @@ func New(o Options) *Render {
 					r.Error("filechanges Receive -> " + item.path)
 				}
 				if item.event == Create || item.event == Write {
-					r.parseFile(item.path)
+					// r.parseFile(item.path)
+					// for go1.8 one template can register must once.
+					r.loadTpls()
 				}
 			}
 		}()
@@ -94,6 +92,11 @@ func (r *Render) Render(w io.Writer, tpl string, data interface{}) error {
 
 // loadTpls load all template files
 func (r *Render) loadTpls() {
+	// set template
+	r.template = template.New("_DEFAULT_")
+	r.template.Funcs(r.FuncMap)
+
+	// load tpl
 	paths, err := r.readDir(r.Root)
 	if err != nil {
 		r.Error(err)
