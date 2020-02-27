@@ -8,8 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"gopkg.in/baa.v1"
-
+	"github.com/go-baa/baa"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

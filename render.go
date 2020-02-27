@@ -10,7 +10,7 @@ import (
 	"runtime"
 	"strings"
 
-	"gopkg.in/baa.v1"
+	"github.com/go-baa/baa"
 )
 
 // Render a powerful template engine than default render of baa
